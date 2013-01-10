@@ -1,5 +1,5 @@
 ﻿/** @license
- | Version 10.1.1
+ | Version 10.1.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@ var storeAttr; //variable for storing the header name for the info window
 var tinyResponse; //variable for storing the response getting from tiny url api
 var tinyUrl; //variable for storing the tiny url
 
-//Function for refreshing address container div
+//Refresh address container
 function RemoveChildren(parentNode) {
     if (parentNode) {
         while (parentNode.hasChildNodes()) {
@@ -35,31 +35,14 @@ String.prototype.trim = function () {
     return this.replace(/^\s*/, "").replace(/\s*$/, "");
 }
 
-//function to validate US ZIP code
-function isValidZipCode(value) {
-    var re = /^\d{5}([\-]\d{4})?$/;
-    return re.test(value);
-}
-
-//Function triggered for creating image
-function CreateImage(imageSrc) {
-    var imgLocate = document.createElement("img");
-    imgLocate.style.width = '20px';
-    imgLocate.style.height = '20px';
-    imgLocate.style.cursor = 'pointer';
-    imgLocate.src = imageSrc;
-    imgLocate.title = 'Click Here';
-    return imgLocate;
-}
-
-//Function for Clearing graphics on map
+//Clear graphics on map
 function ClearGraphics() {
     if (map.getLayer(tempGraphicsLayerId)) {
         map.getLayer(tempGraphicsLayerId).clear();
     }
 }
 
-//Function to add the graphic on the layer
+//Add graphic on the layer
 function AddGraphic(layer, symbol, point) {
     var graphic = new esri.Graphic(point, symbol, null, null);
     layer.add(graphic);
@@ -70,7 +53,7 @@ String.prototype.trimString = function (len) {
     return (this.length > len) ? this.substring(0, len) + "..." : this;
 }
 
-//Function for creating scrollbar for polling details
+//Create scrollbar for polling details
 function CreatePollingDetailsScrollBar(container, content) {
     CreateScrollbar(dojo.byId(container), dojo.byId(content));
     dojo.byId(container + "scrollbar_track").style.top = dojo.coords(dojo.byId(content)).t + "px";
@@ -78,7 +61,7 @@ function CreatePollingDetailsScrollBar(container, content) {
     dojo.byId(container + "scrollbar_track").style.backgroundColor = "#666666";
 }
 
-//function for populating data in the bottom panel
+//Populate data in the bottom panel
 function DetailsContent(feature, attributes, pollingPlaceData) {
     for (var i in map.getLayer(pollLayerId).fields) {
         if (!attributes[map.getLayer(pollLayerId).fields[i].name]) {
@@ -126,14 +109,14 @@ function DetailsContent(feature, attributes, pollingPlaceData) {
             for (var key = 0; key < pollingPlaceData[index].Data.length; key++) {
                 var dataLineEntry = pollingPlaceData[index].Data[key];
                 var dataLineDisplay = "";
-                if(dataLineEntry.FieldName) {
+                if (dataLineEntry.FieldName) {
                     dataLineDisplay = dojo.string.substitute(dataLineEntry.FieldName, attributes);
-                } else if(dataLineEntry.PrecinctFieldExpression && attributes["_PrecinctAttributes"]) {
+                } else if (dataLineEntry.PrecinctFieldExpression && attributes["_PrecinctAttributes"]) {
                     dataLineDisplay = dojo.string.substitute(
                         dataLineEntry.PrecinctFieldExpression, attributes["_PrecinctAttributes"]);
                 }
 
-                if(dataLineDisplay.length > 0) {
+                if (dataLineDisplay.length > 0) {
                     var tr = document.createElement("tr");
                     tr.id = "trDataContainer";
                     tbody.appendChild(tr);
@@ -154,7 +137,7 @@ function DetailsContent(feature, attributes, pollingPlaceData) {
                     td2.style.paddingLeft = "5px";
                     td2.className = "tdBreak";
 
-                    if(CheckMailFormat(dataLineDisplay)) {
+                    if (CheckMailFormat(dataLineDisplay)) {
                         td2.innerHTML = "<u style='cursor:pointer'>" + dataLineDisplay + "</u>";
                         td2.style.wordBreak = "break-all";
                         td2.setAttribute("maill", dataLineDisplay);
@@ -173,10 +156,17 @@ function DetailsContent(feature, attributes, pollingPlaceData) {
             divContainer.appendChild(table);
             CreatePollingDetailsScrollBar("div" + index + "container", "div" + index + "content");
         }
+        else if (showCommentsTab) {
+            dojo.byId("btnAddComments").setAttribute("commentsId", index);
+            FetchComments(dojo.string.substitute(commentsInfoPopupFieldsCollection.PollingID, attributes), index);
+            setTimeout(function () {
+                CreatePollingDetailsScrollBar("div" + index + "container", "div" + index + "content");
+            }, 1000);
+        }
     }
 }
 
-//function to create scroll-bar
+//Create scroll-bar
 function CreateScrollbar(container, content) {
     var yMax;
     var pxLeft, pxTop, xCoord, yCoord;
@@ -219,7 +209,7 @@ function CreateScrollbar(container, content) {
         scrollbar_track.style.display = 'block';
         scrollbar_handle.style.height = Math.max(this.content.offsetHeight * (this.content.offsetHeight / this.content.scrollHeight), 25) + 'px';
         yMax = this.content.offsetHeight - scrollbar_handle.offsetHeight;
-        yMax = yMax - 5; //for getting rounded bottom of handel
+        yMax = yMax - 5; //for getting rounded bottom of handle
         if (window.addEventListener) {
             content.addEventListener('DOMMouseScroll', ScrollDiv, false);
         }
@@ -368,7 +358,7 @@ function CreateScrollbar(container, content) {
     //touch scrollbar end
 }
 
-//function for creating tap events at devices for bottom panel
+//Create tap events at devices for bottom panel
 function CreateHorizontalScrollbar(container, content) {
     var startHPos;
     var scrollingHTimer;
@@ -434,10 +424,10 @@ function CreateHorizontalScrollbar(container, content) {
     //touch scrollbar end
 }
 
-//function ues to trim the string
+//function uses to trim the string
 String.prototype.trim = function () { return this.replace(/^\s+|\s+$/g, ''); }
 
-//Function for showing polling places
+//Display polling places
 function ShowPollingPlace(graphic, attributes) {
     if (mapPoint) {
         if (!noRoute) {
@@ -449,7 +439,7 @@ function ShowPollingPlace(graphic, attributes) {
     }
 }
 
-//function to reset comments data
+//Reset comments data
 function ResetCommentValues() {
     dojo.byId('txtComments').value = '';
     document.getElementById('commentError').innerHTML = "";
@@ -460,7 +450,7 @@ function ResetCommentValues() {
 }
 
 
-//function to show error message span
+//Show error message span
 function ShowSpanErrorMessage(controlId, message) {
     dojo.byId(controlId).style.display = "block";
     dojo.byId(controlId).innerHTML = message;
@@ -496,21 +486,14 @@ function AddComment() {
         if (msg[0].error) {
         }
         else {
-            var table = dojo.query('table', dojo.byId("divCommentsContent"));
-            if (table.length > 0) {
-                var x = dojo.query("tr[noComments = 'true']", table[0]);
-                if (x.length > 0) {
-                    RemoveChildren(table[0]);
+            var table = dojo.query('table', dojo.byId("divcmtscontent"));
+            AddCommentRow(table, attr);
+            if (!isMobileDevice) {
+                if (showCommentsTab) {
+                    var tblCmtsPanel = dojo.query('table', dojo.byId("div" + dojo.byId("btnAddComments").getAttribute("commentsId") + "content"));
+                    AddCommentRow(tblCmtsPanel, attr);
+                    CreatePollingDetailsScrollBar("div" + dojo.byId("btnAddComments").getAttribute("commentsId") + "container", "div" + dojo.byId("btnAddComments").getAttribute("commentsId") + "content");
                 }
-                var tr = table[0].insertRow(0);
-                var commentsCell = document.createElement("td");
-                commentsCell.className = "bottomborder";
-                var index = dojo.query("tr", table[0]).length;
-                if (index) {
-                    index = 0;
-                }
-                commentsCell.appendChild(CreateCommentRecord(attr, index));
-                tr.appendChild(commentsCell);
             }
         }
         dojo.byId('btnAddComments').disabled = false;
@@ -523,7 +506,26 @@ function AddComment() {
     });
 }
 
-//Funcction to get width of a control when text and font size are specified
+//Function to add comment row layout
+function AddCommentRow(table, attr) {
+    if (table.length > 0) {
+        var x = dojo.query("tr[noComments = 'true']", table[0]);
+        if (x.length > 0) {
+            RemoveChildren(table[0]);
+        }
+        var tr = table[0].insertRow(0);
+        var commentsCell = document.createElement("td");
+        commentsCell.className = "bottomborder";
+        var index = dojo.query("tr", table[0]).length;
+        if (index) {
+            index = 0;
+        }
+        commentsCell.appendChild(CreateCommentRecord(attr, index));
+        tr.appendChild(commentsCell);
+    }
+}
+
+//Function to get width of a control when text and font size are specified
 String.prototype.getWidth = function (fontSize) {
     var test = document.createElement("span");
     document.body.appendChild(test);
@@ -537,7 +539,7 @@ String.prototype.getWidth = function (fontSize) {
     return w;
 }
 
-//function to create comment record
+//Create comment record
 function CreateCommentRecord(attributes, i) {
     var table = document.createElement("table");
 
@@ -551,15 +553,20 @@ function CreateCommentRecord(attributes, i) {
     var trDate = document.createElement("tr");
     tbody.appendChild(trDate);
 
+    var dateField;
+    commentsInfoPopupFieldsCollection.Submitdate.replace(/\$\{([^\s\:\}]+)(?:\:([^\s\:\}]+))?\}/g, function (match, key) {
+        dateField = key;
+    });
+
     var td1 = document.createElement("td");
     for (var j = 0; j < map.getLayer(pollingCommentsLayerId).fields.length; j++) {
-        if (map.getLayer(pollingCommentsLayerId).fields[j].name == "SUBMITDT") {
+        if (map.getLayer(pollingCommentsLayerId).fields[j].name == dateField) {
             var c = j;
             break;
         }
     }
     var date = new js.date();
-    var utcMilliseconds = Number(attributes.SUBMITDT);
+    var utcMilliseconds = Number(dojo.string.substitute(commentsInfoPopupFieldsCollection.Submitdate, attributes));
     td1.innerHTML = "Date: " + dojo.date.locale.format(date.utcToLocal(date.utcTimestampFromMs(utcMilliseconds)), { datePattern: formatDateAs, selector: "date" });
     td1.align = "left";
     td1.colSpan = 2;
@@ -577,33 +584,33 @@ function CreateCommentRecord(attributes, i) {
         td2.style.width = (infoPopupWidth - 40) + "px";
     }
     td2.colSpan = 2;
-    if (attributes.COMMENTS) {
-        var wordCount = attributes.COMMENTS.split(/\n/).length;
+    if (dojo.string.substitute(commentsInfoPopupFieldsCollection.Comments, attributes)) {
+        var wordCount = dojo.string.substitute(commentsInfoPopupFieldsCollection.Comments, attributes).trim().split(/\n/).length;
         if (wordCount > 1) {
-            var value = attributes.COMMENTS.split(/\n/)[0].length == 0 ? "<br>" : attributes.COMMENTS.split(/\n/)[0].trim();
+            var value = dojo.string.substitute(commentsInfoPopupFieldsCollection.Comments, attributes).split(/\n/)[0].length == 0 ? "<br>" : dojo.string.substitute(commentsInfoPopupFieldsCollection.Comments, attributes).split(/\n/)[0].trim();
             for (var c = 1; c < wordCount; c++) {
                 var comment;
                 if (value != "<br>") {
-                    comment = attributes.COMMENTS.split(/\n/)[c].trim().replace("", "<br>");
+                    comment = dojo.string.substitute(commentsInfoPopupFieldsCollection.Comments, attributes).split(/\n/)[c].trim().replace("", "<br>");
                 }
                 else {
-                    comment = attributes.COMMENTS.split(/\n/)[c].trim();
+                    comment = dojo.string.substitute(commentsInfoPopupFieldsCollection.Comments, attributes).split(/\n/)[c].trim();
                 }
-                value += attributes.COMMENTS.split(/\n/)[c].length == 0 ? "<br>" : comment;
+                value += dojo.string.substitute(commentsInfoPopupFieldsCollection.Comments, attributes).split(/\n/)[c].length == 0 ? "<br>" : comment;
             }
         }
         else {
-            value = attributes.COMMENTS;
+            value = dojo.string.substitute(commentsInfoPopupFieldsCollection.Comments, attributes);
         }
         td2.innerHTML += value;
 
-        if (CheckMailFormat(attributes.COMMENTS) || dojo.string.substitute(attributes.COMMENTS).match("http:" || "https:")) {
+        if (CheckMailFormat(dojo.string.substitute(commentsInfoPopupFieldsCollection.Comments, attributes)) || dojo.string.substitute(commentsInfoPopupFieldsCollection.Comments, attributes).match("http:") || dojo.string.substitute(commentsInfoPopupFieldsCollection.Comments, attributes).match("https:")) {
             td2.className = "tdBreakWord";
         }
         else {
             td2.className = "tdBreak";
         }
-        var x = attributes.COMMENTS.split(" ");
+        var x = dojo.string.substitute(commentsInfoPopupFieldsCollection.Comments, attributes).split(" ");
         for (var i in x) {
             w = x[i].getWidth(15) - 50;
             var boxWidth = (isMobileDevice) ? (dojo.window.getBox().w - 10) : (infoPopupWidth - 40);
@@ -623,19 +630,30 @@ function CreateCommentRecord(attributes, i) {
     return table;
 }
 
-//Function for fetching comments from Commentslayer
-function FetchComments(pollingID) {
+//Fetch comments from Comments layer
+function FetchComments(pollingID, index) {
     dojo.byId('btnAddComments').disabled = false;
     selectedPollingID = pollingID;
     var query = new esri.tasks.Query();
-    query.where = "POLLINGID = '" + pollingID + "'";
+
+    var relationshipId;
+    commentsInfoPopupFieldsCollection.PollingID.replace(/\$\{([^\s\:\}]+)(?:\:([^\s\:\}]+))?\}/g, function (match, key) {
+        relationshipId = key;
+    });
+
+    query.where = relationshipId + "= '" + pollingID + "'";
     query.outFields = ["*"];
     //execute query
     map.getLayer(pollingCommentsLayerId).selectFeatures(query, esri.layers.FeatureLayer.SELECTION_NEW, function (features) {
         var commentsTable = document.createElement("table");
         commentsTable.id = "tblComment";
         if (!isMobileDevice) {
-            commentsTable.style.width = (infoPopupWidth - 25) + "px";
+            if (index) {
+                commentsTable.style.width = (infoBoxWidth - 25) + "px";
+            }
+            else {
+                commentsTable.style.width = (infoPopupWidth - 25) + "px";
+            }
         }
         else {
             commentsTable.style.width = "100%";
@@ -643,7 +661,13 @@ function FetchComments(pollingID) {
 
         var commentsTBody = document.createElement("tbody");
         commentsTable.appendChild(commentsTBody);
-        dojo.byId("divCommentsContent").appendChild(commentsTable);
+        if (index) {
+            RemoveChildren(dojo.byId("div" + index + "content"));
+            dojo.byId("div" + index + "content").appendChild(commentsTable);
+        }
+        else {
+            dojo.byId("divcmtscontent").appendChild(commentsTable);
+        }
         if (features.length > 0) {
             features.sort(SortResultFeatures);      //function to sort comments based on submitted date
             for (var i = 0; i < features.length; i++) {
@@ -657,13 +681,20 @@ function FetchComments(pollingID) {
             SetHeightComments();
         }
         else {
-            if (dojo.byId("tdCom")) {
-                dojo.byId("tdCom").innerHTML = "";
+            if (index) {
+                if (dojo.byId("tdCom")) {
+                    dojo.byId("tdCom").innerHTML = "";
+                }
+            }
+            else {
+                if (dojo.byId("tdComPanel")) {
+                    dojo.byId("tdComPanel").innerHTML = "";
+                }
             }
             var trComments = document.createElement("tr");
             trComments.id = "trCom";
             var commentsCell = document.createElement("td");
-            commentsCell.id = "tdCom";
+            commentsCell.id = (index) ? "tdCom" : "tdComPanel";
             commentsCell.appendChild(document.createTextNode("No comments available"));
             trComments.setAttribute("noComments", "true");
             trComments.appendChild(commentsCell);
@@ -673,14 +704,14 @@ function FetchComments(pollingID) {
     });
 }
 
-//Function for sorting comments according to date
+//Sort comments according to date
 function SortResultFeatures(a, b) {
-    var x = a.attributes.SUBMITDT;
-    var y = b.attributes.SUBMITDT;
+    var x = dojo.string.substitute(commentsInfoPopupFieldsCollection.Submitdate, a.attributes);
+    var y = dojo.string.substitute(commentsInfoPopupFieldsCollection.Submitdate, b.attributes);
     return ((x > y) ? -1 : ((x < y) ? 1 : 0));
 }
 
-//function for displaying the current location of the user
+//Display current location of the user
 function ShowMyLocation() {
     if (dojo.coords("divLayerContainer").h > 0) {
         dojo.replaceClass("divLayerContainer", "hideContainerHeight", "showContainerHeight");
@@ -729,7 +760,7 @@ function ShowMyLocation() {
 		            return;
 		        }
 		        mapPoint = newPointCollection[0].getPoint(0);
-		        LocateAddressOnMap(false);
+		        LocateGraphicOnMap(false);
 		    });
 		},
 		function (error) {
@@ -751,12 +782,14 @@ function ShowMyLocation() {
 		}, { timeout: 10000 });
 }
 
-//Function triggered for getting attachments information from Featurelayer
+//Function triggered for getting attachments information from feature layer
 function GetAttachmentInfo(files) {
     if (!isMobileDevice) {
         for (var index in pollingPlaceData) {
             if (pollingPlaceData[index].AttachmentDisplayField) {
-                document.getElementById("tbody" + index + "Container").appendChild(Createfiledata(files));
+                if (document.getElementById("tbody" + index + "Container")) {
+                    document.getElementById("tbody" + index + "Container").appendChild(Createfiledata(files));
+                }
             }
         }
     }
@@ -768,7 +801,7 @@ function GetAttachmentInfo(files) {
     }
 }
 
-//Function for retrieving files from FeatureLayer
+//Retrieve files from FeatureLayer
 function Createfiledata(files) {
     if (dojo.byId("trAttachment")) {
         RemoveChildren(dojo.byId("trAttachment"));
@@ -839,7 +872,7 @@ function Createfiledata(files) {
     }
 }
 
-//Function for creating data for the attachments
+//Create layout for the attachments
 function CreateData(text, attachmentURL, fileSize) {
     if (!dojo.byId("tdAttachment")) {
         if (!dojo.byId("trAttachment")) {
@@ -879,7 +912,7 @@ function CreateData(text, attachmentURL, fileSize) {
     }
 }
 
-//function to handle orientation change event handler
+//Handle orientation change event handler
 function orientationChanged() {
     orientationChange = true;
     if (map) {
@@ -889,7 +922,7 @@ function orientationChanged() {
             if (isMobileDevice) {
                 map.reposition();
                 map.resize();
-                SetHeightAddressResults();
+                SetAddressResultsHeight();
                 SetHeightComments();
                 SetHeightSplashScreen();
                 SetHeightViewDetails();
@@ -916,7 +949,7 @@ function orientationChanged() {
     }
 }
 
-//function to hide splash screen container
+//Hide splash screen container
 function HideSplashScreenMessage() {
     if (dojo.isIE < 9) {
         dojo.byId("divSplashScreenContent").style.display = "none";
@@ -925,14 +958,14 @@ function HideSplashScreenMessage() {
     dojo.replaceClass("divSplashScreenContent", "hideContainer", "showContainer");
 }
 
-//function to set height for splash screen
+//Set height for splash screen
 function SetHeightSplashScreen() {
     var height = (isMobileDevice) ? (dojo.window.getBox().h - 110) : (dojo.coords(dojo.byId('divSplashScreenContent')).h - 80);
     dojo.byId('divSplashContent').style.height = (height + 10) + "px";
     CreateScrollbar(dojo.byId("divSplashContainer"), dojo.byId("divSplashContent"));
 }
 
-//function to handle resize browser event handler
+//Handle resize browser event handler
 function resizeHandler() {
     if (map) {
         map.reposition();
@@ -940,7 +973,7 @@ function resizeHandler() {
     }
 }
 
-//function to showe address container
+//Show address container
 function ShowLocateContainer() {
     dojo.byId('txtAddress').blur();
 
@@ -966,17 +999,20 @@ function ShowLocateContainer() {
         else {
             dojo.byId('divAddressHolder').style.height = "300px";
             dojo.replaceClass("divAddressHolder", "showContainerHeight", "hideContainerHeight");
-            setTimeout(function () {
-                dojo.byId('txtAddress').focus();
-            }, 500);
             dojo.byId("txtAddress").value = dojo.byId("txtAddress").getAttribute("defaultAddress");
         }
     }
+    if (dojo.byId("txtAddress").getAttribute("defaultAddress") == dojo.byId("txtAddress").getAttribute("defaultAddressTitle")) {
+        dojo.byId("txtAddress").style.color = "gray";
+    }
+    else {
+        dojo.byId("txtAddress").style.color = "#000";
+    }
     RemoveChildren(dojo.byId('tblAddressResults'));
-    SetHeightAddressResults();
+    SetAddressResultsHeight();
 }
 
-//function to hide address container
+//Hide address container
 function HideAddressContainer() {
     if (isMobileDevice) {
         setTimeout(function () {
@@ -990,18 +1026,19 @@ function HideAddressContainer() {
     }
 }
 
-//function to set height and create scrollbar for address results
-function SetHeightAddressResults() {
+//Set height and create scrollbar for address results
+function SetAddressResultsHeight() {
     var height = (isMobileDevice) ? (dojo.window.getBox().h - 50) : dojo.coords(dojo.byId('divAddressHolder')).h;
     if (height > 0) {
-        dojo.byId('divAddressScrollContent').style.height = (height - ((!isTablet) ? 100 : 120)) + "px";
+        dojo.byId('divAddressScrollContent').style.height = (height - ((!isTablet) ? 120 : 140)) + "px";
     }
     CreateScrollbar(dojo.byId("divAddressScrollContainer"), dojo.byId("divAddressScrollContent"));
 }
 
-//function to hide Info request container
+//Hide Info request container
 function HideInfoContainer() {
     selectedPollPoint = null;
+    featureID = null;
     if (isMobileDevice) {
         setTimeout(function () {
             dojo.byId('divInfoContainer').style.display = "none";
@@ -1015,40 +1052,43 @@ function HideInfoContainer() {
     }
 }
 
-//function to show service request container
+//Show info request container
 function ShowServiceRequestContainer() {
     dojo.byId('divInfoContainer').style.display = "block";
     dojo.replaceClass("divInfoContent", "showContainer", "hideContainer");
 }
 
-//function to set height and create scroll bar for comments
+//Set height and create scroll bar for comments
 function SetHeightComments() {
     var height = (isMobileDevice) ? (dojo.window.getBox().h) : (dojo.coords(dojo.byId('divInfoContent')).h - 10);
     if (height > 0) {
-        dojo.byId('divCommentsContent').style.height = (height - ((isBrowser) ? 120 : 150)) + "px";
+        dojo.byId('divcmtscontent').style.height = (height - ((isBrowser) ? 120 : 150)) + "px";
     }
-    CreateScrollbar(dojo.byId("divCommentsContainer"), dojo.byId("divCommentsContent"));
+    CreateScrollbar(dojo.byId("divCommentsContainer"), dojo.byId("divcmtscontent"));
     if (isMobileDevice) {
         dojo.byId('divInfoComments').style.width = dojo.window.getBox().w - 15 + "px";
     }
 }
 
-//function to set height for view details
+//Set height for view details
 function SetHeightViewDetails() {
     var height = (isMobileDevice) ? dojo.window.getBox().h : dojo.coords(dojo.byId('divInfoContent')).h;
     dojo.byId('divInfoDetailsScroll').style.height = (height - ((isBrowser) ? 55 : 65)) + "px";
-    CreateScrollbar(dojo.byId("divInfoDetails"), dojo.byId("divInfoDetailsScroll"));
+    setTimeout(function () {
+        CreateScrollbar(dojo.byId("divInfoDetails"), dojo.byId("divInfoDetailsScroll"));
+    }, 1000);
 }
 
-//function to set height for view directions
+//Set height for view directions
 function SetHeightViewDirections() {
     var height = (isMobileDevice) ? dojo.window.getBox().h : dojo.coords(dojo.byId('divInfoContent')).h;
     dojo.byId('divInfoDirectionsScroll').style.height = (height - ((isBrowser) ? 55 : 65)) + "px";
     CreateScrollbar(dojo.byId("divInfoDirections"), dojo.byId("divInfoDirectionsScroll"));
 }
 
-//function to show service request deatils infowindow
+//Show service information deatils infowindow
 function ShowServiceInfoDetails(mapPoint, attributes) {
+    featureID = attributes[map.getLayer(pollLayerId).objectIdField];
     map.getLayer(pollLayerId).clearSelection();
     if (!isMobileDevice) {
         dojo.byId('divInfoContent').style.width = infoPopupWidth + "px";
@@ -1147,6 +1187,7 @@ function ShowServiceInfoDetails(mapPoint, attributes) {
                 ShowPollingPlace(null, attributes);
             }
             else {
+                dojo.byId('divInfoDirectionsScroll').style.marginTop = "2px";
                 dojo.byId('divInfoDirectionsScroll').innerHTML = "&nbsp;" + messages.getElementsByTagName("nonDesignatedPollingPlace")[0].childNodes[0].nodeValue;
             }
         }
@@ -1156,7 +1197,7 @@ function ShowServiceInfoDetails(mapPoint, attributes) {
     }, 300);
 }
 
-//function to create service request details view
+//Create information details view
 function ServiceRequestDetails(point, attributes) {
     if (!isMobileDevice) {
         dojo.byId('divInfoContent').style.display = "block";
@@ -1189,6 +1230,7 @@ function ServiceRequestDetails(point, attributes) {
             else {
                 desgFlag = false;
                 if (dojo.byId('div' + index + 'content')) {
+                    dojo.byId('div' + index + 'content').style.marginTop = "2px";
                     dojo.byId('div' + index + 'content').innerHTML = "&nbsp;" + messages.getElementsByTagName("nonDesignatedPollingPlace")[0].childNodes[0].nodeValue;
                 }
                 devObjectId = attributes[map.getLayer(pollLayerId).objectIdField];
@@ -1219,7 +1261,7 @@ function ServiceRequestDetails(point, attributes) {
 
     ShowInfoDetailsView();
     RemoveChildren(dojo.byId('tblInfoDetails'));
-    RemoveChildren(dojo.byId('divCommentsContent'));
+    RemoveChildren(dojo.byId('divcmtscontent'));
     var value;
     if (isBrowser) {
         value = dojo.string.substitute(infoWindowHeader, attributes).trim();
@@ -1245,32 +1287,33 @@ function ServiceRequestDetails(point, attributes) {
             if (pollingPlaceData[ind].ShowDirection) {
                 continue;
             }
-            var trInfoDetailsHeader = document.createElement('tr');
-            tbodyInfoDetails.appendChild(trInfoDetailsHeader);
-            var tdInfoDetailsHeader = document.createElement('td');
-            trInfoDetailsHeader.appendChild(tdInfoDetailsHeader);
-            var tblDtlHdr = document.createElement('table');
-            tblDtlHdr.style.backgroundColor = pollingPlaceData[ind].HeaderColor;
-            tdInfoDetailsHeader.appendChild(tblDtlHdr);
-            tblDtlHdr.style.width = "100%";
-            var tbodyDtlHdr = document.createElement('tbody');
-            tblDtlHdr.appendChild(tbodyDtlHdr);
-            var trDtlHdr = document.createElement('tr');
-            tbodyDtlHdr.appendChild(trDtlHdr);
-            var tdDtlHdr = document.createElement("td");
-            tdDtlHdr.innerHTML = pollingPlaceData[ind].Title;
-            trDtlHdr.appendChild(tdDtlHdr);
+            if (pollingPlaceData[ind].Data || (pollingPlaceData[ind].ShowDirection == (true || false))) {
+                var trInfoDetailsHeader = document.createElement('tr');
+                tbodyInfoDetails.appendChild(trInfoDetailsHeader);
+                var tdInfoDetailsHeader = document.createElement('td');
+                trInfoDetailsHeader.appendChild(tdInfoDetailsHeader);
+                var tblDtlHdr = document.createElement('table');
+                tblDtlHdr.style.backgroundColor = pollingPlaceData[ind].HeaderColor;
+                tdInfoDetailsHeader.appendChild(tblDtlHdr);
+                tblDtlHdr.style.width = "100%";
+                var tbodyDtlHdr = document.createElement('tbody');
+                tblDtlHdr.appendChild(tbodyDtlHdr);
+                var trDtlHdr = document.createElement('tr');
+                tbodyDtlHdr.appendChild(trDtlHdr);
+                var tdDtlHdr = document.createElement("td");
+                tdDtlHdr.innerHTML = pollingPlaceData[ind].Title;
+                trDtlHdr.appendChild(tdDtlHdr);
 
-            var trInfoDetailsList = document.createElement('tr');
-            tbodyInfoDetails.appendChild(trInfoDetailsList);
-            var tdInfoDetailsList = document.createElement('td');
-            trInfoDetailsList.appendChild(tdInfoDetailsList);
-            var tblDtlLst = document.createElement("table");
-            tblDtlLst.style.width = "100%";
-            tdInfoDetailsList.appendChild(tblDtlLst);
-            var tbodyDtlLst = document.createElement('tbody');
-            tblDtlLst.appendChild(tbodyDtlLst);
-
+                var trInfoDetailsList = document.createElement('tr');
+                tbodyInfoDetails.appendChild(trInfoDetailsList);
+                var tdInfoDetailsList = document.createElement('td');
+                trInfoDetailsList.appendChild(tdInfoDetailsList);
+                var tblDtlLst = document.createElement("table");
+                tblDtlLst.style.width = "100%";
+                tdInfoDetailsList.appendChild(tblDtlLst);
+                var tbodyDtlLst = document.createElement('tbody');
+                tblDtlLst.appendChild(tbodyDtlLst);
+            }
 
             for (var index in pollingPlaceData[ind].Data) {
                 var trDtlLst = document.createElement('tr');
@@ -1384,10 +1427,10 @@ function ServiceRequestDetails(point, attributes) {
         }
     }
     SetHeightViewDetails();
-    FetchComments(attributes.POLLINGID);
+    FetchComments(dojo.string.substitute(commentsInfoPopupFieldsCollection.PollingID, attributes), null);
 }
 
-//function to get the extent based on the mappoint
+//Get extent based on the mappoint
 function GetBrowserMapExtent(mapPoint) {
     var width = map.extent.getWidth();
     var height = map.extent.getHeight();
@@ -1398,7 +1441,7 @@ function GetBrowserMapExtent(mapPoint) {
     return new esri.geometry.Extent(xmin, ymin, xmax, ymax, map.spatialReference);
 }
 
-//function to get the extent based on the mappoint
+//Get extent based on the mappoint
 function GetMobileMapExtent(mapPoint) {
     var width = map.extent.getWidth();
     var height = map.extent.getHeight();
@@ -1409,7 +1452,7 @@ function GetMobileMapExtent(mapPoint) {
     return new esri.geometry.Extent(xmin, ymin, xmax, ymax, map.spatialReference);
 }
 
-//function to show Info request details view
+//Show Info request details view
 function ShowInfoDetailsView() {
     dojo.byId('imgDirections').style.display = "none";
     if (showCommentsTab) {
@@ -1440,7 +1483,7 @@ function ShowInfoDetailsView() {
     }
 }
 
-//function to show comments view
+//Show comments view
 function ShowCommentsView() {
     if (showCommentsTab) {
         dojo.byId("imgDirections").style.cursor = "pointer";
@@ -1505,7 +1548,7 @@ function ShowCommentsView() {
     }
 }
 
-//function for triming the info window header acording to mobile media screen
+//Trim the info window header according to mobile media screen
 function HeaderInfo() {
     if (dojo.byId('imgDirections').getAttribute("disp") == "Directions") {
         var value = "Polling Place Details";
@@ -1533,7 +1576,7 @@ function HeaderInfo() {
     dojo.byId('tdInfoHeader').innerHTML = value;
 }
 
-//function to show Info request directions view
+//Show Info request directions view
 function ShowInfoDirectionsView() {
     if (isMobileDevice) {
         if (dojo.byId('imgDirections').getAttribute("disp") == "Details") {
@@ -1582,7 +1625,7 @@ function ShowInfoDirectionsView() {
     }
 }
 
-//function to show add comments view
+//Show add comments view
 function ShowAddCommentsView() {
     dojo.byId('divAddComment').style.display = "block";
     dojo.byId('divCommentsView').style.display = "none";
@@ -1593,7 +1636,7 @@ function ShowAddCommentsView() {
     }, 50);
 }
 
-//function to show comments controls with scrollbar
+//Show comments controls with scrollbar
 function SetHeightCmtControls() {
     var height = (isMobileDevice) ? (dojo.window.getBox().h - 20) : dojo.coords(dojo.byId('divInfoContent')).h;
     dojo.byId("divCmtIpContainer").style.height = (height - ((isTablet) ? 100 : 80)) + "px";
@@ -1601,7 +1644,7 @@ function SetHeightCmtControls() {
     CreateScrollbar(dojo.byId("divCmtIpContainer"), dojo.byId("divCmtIpContent"));
 }
 
-//function to reset mapposition
+//Reset map position
 function SetMapTipPosition() {
     if (!orientationChange) {
         if (selectedPollPoint) {
@@ -1618,12 +1661,27 @@ function SetMapTipPosition() {
     }
 }
 
-//Function to open login page for facebook,tweet,email
+//Function to made tinyurl for facebook,tweet,email
 function ShareLink(ext) {
     tinyUrl = null;
     mapExtent = GetMapExtent();
     var url = esri.urlToObject(window.location.toString());
-    var urlStr = encodeURI(url.path) + "?extent=" + mapExtent;
+    var urlStr;
+    if (mapPoint) {
+        if (featureID) {
+            urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$addressPoint=" + mapPoint.x + "," + mapPoint.y + "$featureID=" + featureID;
+        }
+        else {
+            urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$addressPoint=" + mapPoint.x + "," + mapPoint.y;
+        }
+    }
+    else if (featureID) {
+        urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$featureID=" + featureID;
+    }
+    else {
+        urlStr = encodeURI(url.path) + "?extent=" + mapExtent;
+    }
+
     url = dojo.string.substitute(mapSharingOptions.TinyURLServiceURL, [urlStr]);
 
     dojo.io.script.get({
@@ -1695,7 +1753,7 @@ function Share(site) {
     }
 }
 
-//Function to get map Extent
+//Get map Extent
 function GetMapExtent() {
     var extents = map.extent.xmin.toString() + ",";
     extents += map.extent.ymin.toString() + ",";
@@ -1704,7 +1762,7 @@ function GetMapExtent() {
     return (extents);
 }
 
-//Function to get the query string value of the provided key if not found the function returns empty string
+//Get the query string value of the provided key if not found the function returns empty string
 function GetQuerystring(key) {
     var _default;
     if (_default == null) _default = "";
@@ -1717,21 +1775,21 @@ function GetQuerystring(key) {
         return qs[1];
 }
 
-//function to restrict the maximum no of characters in the textarea control
+//Restrict the maximum no of characters in the textarea control
 function imposeMaxLength(Object, MaxLen) {
     return (Object.value.length <= MaxLen);
 }
 
-//function to show progress indicator
+//Show progress indicator
 function ShowProgressIndicator() {
     dojo.byId('divLoadingIndicator').style.display = "block";
 }
 
-//function to hide progress indicator
+//Hide progress indicator
 function HideProgressIndicator() {
     dojo.byId('divLoadingIndicator').style.display = "none";
 }
-//Function for validating Email in comments tab
+//Validating Email in comments tab
 function CheckMailFormat(emailValue) {
     var pattern = /^([a-zA-Z][a-zA-Z0-9\_\-\.]*\@[a-zA-Z0-9\-]*\.[a-zA-Z]{2,4})?$/i
     if (pattern.test(emailValue)) {
@@ -1739,6 +1797,51 @@ function CheckMailFormat(emailValue) {
     } else {
         return false;
     }
+}
+
+//Clear default value for text box controls
+function ClearDefaultText(e) {
+    var target = window.event ? window.event.srcElement : e ? e.target : null;
+    if (!target) return;
+    target.style.color = "#FFF";
+    target.value = '';
+}
+
+//Set default value on blur
+function ReplaceDefaultText(e) {
+    var target = window.event ? window.event.srcElement : e ? e.target : null;
+    if (!target) return;
+    ResetTargetValue(target, "defaultAddressTitle", "gray");
+}
+
+//Set changed value for address
+function ResetTargetValue(target, title, color) {
+    if (target.value == '' && target.getAttribute(title)) {
+        target.value = target.title;
+        if (target.title == "") {
+            target.value = target.getAttribute(title);
+            target.style.color = color;
+        }
+    }
+}
+
+//Query the features while sharing
+function ExecuteQueryTask() {
+    ShowProgressIndicator();
+    var queryTask = new esri.tasks.QueryTask(isBrowser ? pollLayer.ServiceUrl : pollMobileLayer.ServiceUrl);
+    var query = new esri.tasks.Query;
+    query.outSpatialReference = map.spatialReference;
+    query.where = map.getLayer(pollLayerId).objectIdField + "=" + featureID;
+    query.outFields = ["*"];
+    query.returnGeometry = true;
+    queryTask.execute(query, function (fset) {
+        if (fset.features.length > 0) {
+            ShowServiceInfoDetails(fset.features[0].geometry, fset.features[0].attributes);
+        }
+        HideProgressIndicator();
+    }, function (err) {
+        alert(err.Message);
+    });
 }
 
 
